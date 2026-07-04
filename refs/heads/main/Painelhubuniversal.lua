@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local TeamsService = game:GetService("Teams")
 
 local function getLocalPlayer()
     local player = Players.LocalPlayer
@@ -138,6 +139,230 @@ local function CreateDebugButton(text, callback)
     Button.MouseButton1Click:Connect(callback)
     return Button
 end
+
+local function CreateSectionLabel(text)
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -5, 0, 18)
+    Label.Text = text
+    Label.TextColor3 = Color3.fromRGB(120, 180, 255)
+    Label.BackgroundTransparency = 1
+    Label.Font = Enum.Font.GothamBold
+    Label.TextSize = 12
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = ContentContainer
+    return Label
+end
+
+local noclipEnabled = false
+local noclipStateCache = {}
+local speedBoostEnabled = false
+local originalWalkSpeed = nil
+local originalJumpPower = nil
+local ghostEnabled = false
+local teamButtons = {}
+
+local function ApplyNoclip(state)
+    noclipEnabled = state
+    local character = localPlayer.Character
+    if not character then
+        return
+    end
+
+    for _, obj in ipairs(character:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            if state then
+                noclipStateCache[obj] = obj.CanCollide
+                obj.CanCollide = false
+            else
+                if noclipStateCache[obj] ~= nil then
+                    obj.CanCollide = noclipStateCache[obj]
+                end
+            end
+        end
+    end
+
+    if not state then
+        table.clear(noclipStateCache)
+    end
+end
+
+local function ToggleNoclip()
+    ApplyNoclip(not noclipEnabled)
+end
+
+local function ToggleSpeedBoost()
+    speedBoostEnabled = not speedBoostEnabled
+    local character = localPlayer.Character
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then
+        return
+    end
+
+    if speedBoostEnabled then
+        originalWalkSpeed = humanoid.WalkSpeed
+        originalJumpPower = humanoid.JumpPower
+        humanoid.WalkSpeed = 80
+        humanoid.JumpPower = 100
+    else
+        if originalWalkSpeed ~= nil then
+            humanoid.WalkSpeed = originalWalkSpeed
+        end
+        if originalJumpPower ~= nil then
+            humanoid.JumpPower = originalJumpPower
+        end
+    end
+end
+
+local function ToggleGhostMode()
+    ghostEnabled = not ghostEnabled
+    local character = localPlayer.Character
+    if not character then
+        return
+    end
+
+    for _, obj in ipairs(character:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.Transparency = ghostEnabled and 0.55 or 0
+        end
+    end
+end
+
+local function EscapeJail()
+    local character = localPlayer.Character
+    local root = character and character:FindFirstChild("HumanoidRootPart")
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+    if not root or not humanoid then
+        return
+    end
+
+    local nearbyJailParts = {}
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            local name = string.lower(obj.Name)
+            if name:find("jail") or name:find("prison") or name:find("cell") or name:find("gaol") then
+                if (obj.Position - root.Position).Magnitude < 80 then
+                    table.insert(nearbyJailParts, obj)
+                end
+            end
+        end
+    end
+
+    if #nearbyJailParts > 0 then
+        for _, part in ipairs(nearbyJailParts) do
+            part.CanCollide = false
+            part.Transparency = 1
+        end
+    end
+
+    root.CFrame = root.CFrame + Vector3.new(0, 8, 0)
+    humanoid.Sit = false
+end
+
+local function ClearTeamButtons()
+    for _, btn in ipairs(teamButtons) do
+        if btn and btn.Parent then
+            btn:Destroy()
+        end
+    end
+    teamButtons = {}
+end
+
+local function RefreshTeamsMenu()
+    ClearTeamButtons()
+
+    local header = CreateSectionLabel("JAIL / TIMES / FUN")
+    header.TextSize = 13
+
+    CreateDebugButton("Liberar do Jail / Prisão", EscapeJail)
+    CreateDebugButton("Alternar Noclip (Self)", ToggleNoclip)
+    CreateDebugButton("Modo Divertido: Super Speed", ToggleSpeedBoost)
+    CreateDebugButton("Modo Divertido: Super Jump", function()
+        local character = localPlayer.Character
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+        if not humanoid then
+            return
+        end
+
+        humanoid.JumpPower = 120
+        task.wait(0.3)
+        humanoid.JumpPower = 50
+    end)
+    CreateDebugButton("Modo Divertido: Ghost", ToggleGhostMode)
+
+    local teamLabel = Instance.new("TextLabel")
+    teamLabel.Size = UDim2.new(1, -5, 0, 18)
+    teamLabel.Text = "Times atuais:" 
+    teamLabel.TextColor3 = Color3.fromRGB(255, 210, 90)
+    teamLabel.BackgroundTransparency = 1
+    teamLabel.Font = Enum.Font.GothamBold
+    teamLabel.TextSize = 12
+    teamLabel.TextXAlignment = Enum.TextXAlignment.Left
+    teamLabel.Parent = ContentContainer
+
+    local teams = {}
+    for _, team in ipairs(TeamsService:GetChildren()) do
+        if team:IsA("Team") then
+            table.insert(teams, team)
+        end
+    end
+    table.sort(teams, function(a, b)
+        return a.Name < b.Name
+    end)
+
+    for _, team in ipairs(teams) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, -5, 0, 30)
+        btn.Text = "Entrar em " .. team.Name
+        btn.TextColor3 = Color3.fromRGB(240, 240, 240)
+        btn.BackgroundColor3 = Color3.fromRGB(45, 45, 58)
+        btn.Font = Enum.Font.Gotham
+        btn.TextSize = 12
+        btn.Parent = ContentContainer
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 4)
+        corner.Parent = btn
+
+        btn.MouseButton1Click:Connect(function()
+            local success, err = pcall(function()
+                localPlayer.Team = team
+            end)
+            if not success then
+                warn("Não foi possível entrar no time: " .. tostring(err))
+            end
+        end)
+
+        table.insert(teamButtons, btn)
+    end
+end
+
+RefreshTeamsMenu()
+
+TeamsService.ChildAdded:Connect(function()
+    RefreshTeamsMenu()
+end)
+TeamsService.ChildRemoved:Connect(function()
+    RefreshTeamsMenu()
+end)
+Players.PlayerAdded:Connect(function()
+    RefreshTeamsMenu()
+end)
+Players.PlayerRemoving:Connect(function()
+    RefreshTeamsMenu()
+end)
+
+localPlayer.CharacterAdded:Connect(function(character)
+    if noclipEnabled then
+        task.wait(0.2)
+        ApplyNoclip(true)
+    end
+
+    if ghostEnabled then
+        task.wait(0.2)
+        ToggleGhostMode()
+    end
+end)
 
 -- =============================================================================
 -- RECURSO 1: VOO
