@@ -177,6 +177,7 @@ ToggleBtn.MouseButton1Click:Connect(function()
 end)
 
 local pageButtons = {}
+local pageBuilders = {}
 local activePage = "Main"
 
 local function ClearPageContent()
@@ -209,6 +210,8 @@ local function CreatePageButton(pageName, buttonText)
             for name, btn in pairs(pageButtons) do
                 btn.BackgroundColor3 = (name == pageName) and Color3.fromRGB(45, 50, 70) or Color3.fromRGB(30, 35, 45)
             end
+            pageBuilders = pageBuilders or {}
+            print("DebugPanel: pageBuilders exists?", pageBuilders ~= nil, pageName, pageBuilders[pageName] ~= nil)
             if pageBuilders[pageName] then
                 pageBuilders[pageName]()
             end
@@ -220,6 +223,7 @@ local function CreatePageButton(pageName, buttonText)
 end
 
 local function SetPage(pageName)
+    pageBuilders = pageBuilders or {}
     print("DebugPanel:SetPage", pageName, pageBuilders[pageName] ~= nil)
     activePage = pageName
     PageTitle.Text = pageButtons[pageName] and pageButtons[pageName].Text or pageName
@@ -387,8 +391,6 @@ local function CreateSlider(text, minValue, maxValue, startValue, callback)
 
     return frame
 end
-
-local pageBuilders = {}
 
 local godModeEnabled = false
 local aimbotEnabled = false
