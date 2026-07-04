@@ -54,38 +54,49 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = playerGui
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 360, 0, 300)
-MainFrame.Position = UDim2.new(0.5, -180, 0.4, -150)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+MainFrame.Size = UDim2.new(0, 460, 0, 380)
+MainFrame.Position = UDim2.new(0.5, -230, 0.35, -190)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = MainFrame
 
 local Header = Instance.new("Frame")
 Header.Size = UDim2.new(1, 0, 0, 40)
-Header.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+Header.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 Header.BorderSizePixel = 0
 Header.Parent = MainFrame
 
 local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0, 8)
+HeaderCorner.CornerRadius = UDim.new(0, 10)
 HeaderCorner.Parent = Header
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0.6, 0, 1, 0)
+Title.Size = UDim2.new(0.45, 0, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.Text = "STUDIO DEBUG PANEL"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextColor3 = Color3.fromRGB(220, 220, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.BackgroundTransparency = 1
 Title.Parent = Header
+
+local PageTitle = Instance.new("TextLabel")
+PageTitle.Size = UDim2.new(0.4, 0, 1, 0)
+PageTitle.Position = UDim2.new(0.5, 0, 0, 0)
+PageTitle.Text = "Main"
+PageTitle.TextColor3 = Color3.fromRGB(170, 220, 255)
+PageTitle.Font = Enum.Font.Gotham
+PageTitle.TextSize = 14
+PageTitle.TextXAlignment = Enum.TextXAlignment.Center
+PageTitle.BackgroundTransparency = 1
+PageTitle.Parent = Header
 
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 30, 0, 30)
@@ -101,65 +112,316 @@ local BtnCorner = Instance.new("UICorner")
 BtnCorner.CornerRadius = UDim.new(0, 6)
 BtnCorner.Parent = ToggleBtn
 
-local ContentContainer = Instance.new("ScrollingFrame")
-ContentContainer.Size = UDim2.new(1, -20, 1, -55)
-ContentContainer.Position = UDim2.new(0, 10, 0, 45)
-ContentContainer.BackgroundTransparency = 1
-ContentContainer.ScrollBarThickness = 4
-ContentContainer.CanvasSize = UDim2.new(0, 0, 0, 450)
-ContentContainer.Parent = MainFrame
+local SideMenuFrame = Instance.new("Frame")
+SideMenuFrame.Size = UDim2.new(0, 120, 1, -45)
+SideMenuFrame.Position = UDim2.new(0, 0, 0, 45)
+SideMenuFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
+SideMenuFrame.BorderSizePixel = 0
+SideMenuFrame.Parent = MainFrame
 
-local UIListLayout = Instance.new("UIListLayout")
-UIListLayout.Padding = UDim.new(0, 8)
-UIListLayout.Parent = ContentContainer
+local SidePadding = Instance.new("UIPadding")
+SidePadding.PaddingTop = UDim.new(0, 12)
+SidePadding.PaddingLeft = UDim.new(0, 8)
+SidePadding.PaddingRight = UDim.new(0, 8)
+SidePadding.Parent = SideMenuFrame
+
+local SideLayout = Instance.new("UIListLayout")
+SideLayout.FillDirection = Enum.FillDirection.Vertical
+SideLayout.Padding = UDim.new(0, 8)
+SideLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+SideLayout.SortOrder = Enum.SortOrder.LayoutOrder
+SideLayout.Parent = SideMenuFrame
+
+local PagesFrame = Instance.new("Frame")
+PagesFrame.Size = UDim2.new(1, -130, 1, -45)
+PagesFrame.Position = UDim2.new(0, 130, 0, 45)
+PagesFrame.BackgroundTransparency = 1
+PagesFrame.Parent = MainFrame
+
+local ContentScroll = Instance.new("ScrollingFrame")
+ContentScroll.Size = UDim2.new(1, 0, 1, 0)
+ContentScroll.Position = UDim2.new(0, 0, 0, 0)
+ContentScroll.BackgroundTransparency = 1
+ContentScroll.ScrollBarThickness = 6
+ContentScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+ContentScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+ContentScroll.Parent = PagesFrame
+
+local PageListLayout = Instance.new("UIListLayout")
+PageListLayout.Padding = UDim.new(0, 8)
+PageListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+PageListLayout.Parent = ContentScroll
+
+local PagePadding = Instance.new("UIPadding")
+PagePadding.PaddingTop = UDim.new(0, 12)
+PagePadding.PaddingLeft = UDim.new(0, 8)
+PagePadding.PaddingRight = UDim.new(0, 8)
+PagePadding.PaddingBottom = UDim.new(0, 12)
+PagePadding.Parent = ContentScroll
+
+local function UpdateCanvasSize()
+    ContentScroll.CanvasSize = UDim2.new(0, 0, 0, PageListLayout.AbsoluteContentSize.Y + 12)
+end
+PageListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdateCanvasSize)
+UpdateCanvasSize()
 
 local isMinimized = false
 ToggleBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
-    local targetSize = isMinimized and UDim2.new(0, 360, 0, 40) or UDim2.new(0, 360, 0, 300)
+    local targetSize = isMinimized and UDim2.new(0, 460, 0, 40) or UDim2.new(0, 460, 0, 380)
     ToggleBtn.Text = isMinimized and "+" or "-"
-    ContentContainer.Visible = not isMinimized
+    SideMenuFrame.Visible = not isMinimized
+    PagesFrame.Visible = not isMinimized
+    PageTitle.Visible = not isMinimized
     TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Size = targetSize}):Play()
 end)
 
-local function CreateDebugButton(text, callback)
+local pageButtons = {}
+local activePage = "Main"
+
+local function ClearPageContent()
+    for _, child in ipairs(ContentScroll:GetChildren()) do
+        if child ~= PageListLayout and child ~= PagePadding then
+            child:Destroy()
+        end
+    end
+end
+
+local function CreatePageButton(pageName, buttonText)
     local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(1, -5, 0, 35)
-    Button.Text = text
-    Button.TextColor3 = Color3.fromRGB(240, 240, 240)
-    Button.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    Button.Size = UDim2.new(1, 0, 0, 34)
+    Button.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+    Button.BorderSizePixel = 0
+    Button.Text = buttonText
+    Button.TextColor3 = Color3.fromRGB(220, 220, 255)
     Button.Font = Enum.Font.Gotham
     Button.TextSize = 13
-    Button.Parent = ContentContainer
+    Button.Parent = SideMenuFrame
 
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, 4)
-    c.Parent = Button
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 6)
+    buttonCorner.Parent = Button
 
-    Button.MouseButton1Click:Connect(callback)
+    Button.MouseButton1Click:Connect(function()
+        if activePage ~= pageName then
+            activePage = pageName
+            PageTitle.Text = buttonText
+            for name, btn in pairs(pageButtons) do
+                btn.BackgroundColor3 = (name == pageName) and Color3.fromRGB(45, 50, 70) or Color3.fromRGB(30, 35, 45)
+            end
+            if pageBuilders[pageName] then
+                pageBuilders[pageName]()
+            end
+        end
+    end)
+
+    pageButtons[pageName] = Button
     return Button
 end
 
 local function CreateSectionLabel(text)
     local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -5, 0, 18)
+    Label.Size = UDim2.new(1, -10, 0, 20)
     Label.Text = text
-    Label.TextColor3 = Color3.fromRGB(120, 180, 255)
+    Label.TextColor3 = Color3.fromRGB(140, 180, 255)
     Label.BackgroundTransparency = 1
     Label.Font = Enum.Font.GothamBold
-    Label.TextSize = 12
+    Label.TextSize = 13
     Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = ContentContainer
+    Label.Parent = ContentScroll
     return Label
 end
 
+local function CreateActionButton(text, callback)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, -10, 0, 34)
+    Button.Text = text
+    Button.TextColor3 = Color3.fromRGB(240, 240, 240)
+    Button.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+    Button.Font = Enum.Font.Gotham
+    Button.TextSize = 13
+    Button.BorderSizePixel = 0
+    Button.AutoButtonColor = true
+    Button.Parent = ContentScroll
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = Button
+
+    Button.MouseButton1Click:Connect(callback)
+    return Button
+end
+
+local function CreateToggleButton(text, initialState, callback)
+    local button = CreateActionButton(text .. (initialState and " [ON]" or " [OFF]"), function()
+        local newState = callback()
+        button.Text = text .. (newState and " [ON]" or " [OFF]")
+    end)
+    return button
+end
+
+local function CreateSlider(text, minValue, maxValue, startValue, callback)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, -10, 0, 70)
+    frame.BackgroundTransparency = 1
+    frame.Parent = ContentScroll
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 18)
+    title.Text = text
+    title.TextColor3 = Color3.fromRGB(220, 220, 220)
+    title.BackgroundTransparency = 1
+    title.Font = Enum.Font.Gotham
+    title.TextSize = 13
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = frame
+
+    local valueLabel = Instance.new("TextLabel")
+    valueLabel.Size = UDim2.new(0, 60, 0, 18)
+    valueLabel.Position = UDim2.new(1, -60, 0, 0)
+    valueLabel.Text = tostring(startValue)
+    valueLabel.TextColor3 = Color3.fromRGB(170, 220, 255)
+    valueLabel.BackgroundTransparency = 1
+    valueLabel.Font = Enum.Font.GothamBold
+    valueLabel.TextSize = 13
+    valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    valueLabel.Parent = frame
+
+    local sliderTrack = Instance.new("Frame")
+    sliderTrack.Size = UDim2.new(1, 0, 0, 18)
+    sliderTrack.Position = UDim2.new(0, 0, 0, 28)
+    sliderTrack.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+    sliderTrack.BorderSizePixel = 0
+    sliderTrack.Parent = frame
+
+    local trackCorner = Instance.new("UICorner")
+    trackCorner.CornerRadius = UDim.new(0, 6)
+    trackCorner.Parent = sliderTrack
+
+    local fill = Instance.new("Frame")
+    fill.Size = UDim2.new(0, 0, 1, 0)
+    fill.BackgroundColor3 = Color3.fromRGB(90, 160, 255)
+    fill.BorderSizePixel = 0
+    fill.Parent = sliderTrack
+
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(0, 6)
+    fillCorner.Parent = fill
+
+    local handle = Instance.new("Frame")
+    handle.Size = UDim2.new(0, 14, 0, 14)
+    handle.Position = UDim2.new(0, -7, 0, 2)
+    handle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    handle.BorderSizePixel = 0
+    handle.Parent = sliderTrack
+
+    local handleCorner = Instance.new("UICorner")
+    handleCorner.CornerRadius = UDim.new(0, 7)
+    handleCorner.Parent = handle
+
+    local dragging = false
+    local range = maxValue - minValue
+
+    local function setSlider(value)
+        value = math.clamp(value, minValue, maxValue)
+        local ratio = range > 0 and (value - minValue) / range or 0
+        fill.Size = UDim2.new(ratio, 0, 1, 0)
+        handle.Position = UDim2.new(ratio, -7, 0, 2)
+        valueLabel.Text = tostring(value)
+        callback(value)
+    end
+
+    local function updateFromInput(inputPosition)
+        local trackPos = sliderTrack.AbsolutePosition.X
+        local trackSize = sliderTrack.AbsoluteSize.X
+        local raw = (inputPosition.X - trackPos) / trackSize
+        setSlider(minValue + raw * range)
+    end
+
+    sliderTrack.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            updateFromInput(input.Position)
+        end
+    end)
+
+    sliderTrack.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            updateFromInput(input.Position)
+        end
+    end)
+
+    task.spawn(function()
+        setSlider(startValue)
+    end)
+
+    return frame
+end
+
+local pageBuilders = {}
+
+local godModeEnabled = false
+local aimbotEnabled = false
+local killAuraEnabled = false
+local killAuraRadius = 35
+local aimbotFov = 45
+local playerSpeed = 16
+local playerJump = 50
 local noclipEnabled = false
-local noclipStateCache = {}
-local speedBoostEnabled = false
-local originalWalkSpeed = nil
-local originalJumpPower = nil
 local ghostEnabled = false
-local teamButtons = {}
+
+local aimbotConnection = nil
+local killAuraConnection = nil
+local godModeConnection = nil
+local noclipStateCache = {}
+
+local function GetLocalHumanoid()
+    local character = localPlayer.Character
+    return character and character:FindFirstChildOfClass("Humanoid")
+end
+
+local function ApplyPlayerMovement()
+    local humanoid = GetLocalHumanoid()
+    if not humanoid then
+        return
+    end
+
+    humanoid.WalkSpeed = playerSpeed
+    humanoid.JumpPower = playerJump
+end
+
+local function ApplyGodMode()
+    local humanoid = GetLocalHumanoid()
+    if not humanoid then
+        return
+    end
+
+    if godModeEnabled then
+        humanoid.MaxHealth = 9e8
+        humanoid.Health = humanoid.MaxHealth
+    else
+        humanoid.MaxHealth = humanoid.MaxHealth < 100 and 100 or humanoid.MaxHealth
+    end
+end
+
+local function ApplyGhostMode()
+    local character = localPlayer.Character
+    if not character then
+        return
+    end
+
+    for _, obj in ipairs(character:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.Transparency = ghostEnabled and 0.55 or 0
+        end
+    end
+end
 
 local function ApplyNoclip(state)
     noclipEnabled = state
@@ -187,434 +449,243 @@ local function ApplyNoclip(state)
 end
 
 local function ToggleNoclip()
-    ApplyNoclip(not noclipEnabled)
-end
-
-local function ToggleSpeedBoost()
-    speedBoostEnabled = not speedBoostEnabled
-    local character = localPlayer.Character
-    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-    if not humanoid then
-        return
-    end
-
-    if speedBoostEnabled then
-        originalWalkSpeed = humanoid.WalkSpeed
-        originalJumpPower = humanoid.JumpPower
-        humanoid.WalkSpeed = 80
-        humanoid.JumpPower = 100
-    else
-        if originalWalkSpeed ~= nil then
-            humanoid.WalkSpeed = originalWalkSpeed
-        end
-        if originalJumpPower ~= nil then
-            humanoid.JumpPower = originalJumpPower
-        end
-    end
+    noclipEnabled = not noclipEnabled
+    ApplyNoclip(noclipEnabled)
+    return noclipEnabled
 end
 
 local function ToggleGhostMode()
     ghostEnabled = not ghostEnabled
-    local character = localPlayer.Character
-    if not character then
-        return
-    end
-
-    for _, obj in ipairs(character:GetDescendants()) do
-        if obj:IsA("BasePart") then
-            obj.Transparency = ghostEnabled and 0.55 or 0
-        end
-    end
+    ApplyGhostMode()
+    return ghostEnabled
 end
 
-local function EscapeJail()
-    local character = localPlayer.Character
-    local root = character and character:FindFirstChild("HumanoidRootPart")
-    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-
-    if not root or not humanoid then
-        return
+local function UpdateGodModeState()
+    if godModeConnection then
+        godModeConnection:Disconnect()
+        godModeConnection = nil
     end
 
-    local nearbyJailParts = {}
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") then
-            local name = string.lower(obj.Name)
-            if name:find("jail") or name:find("prison") or name:find("cell") or name:find("gaol") then
-                if (obj.Position - root.Position).Magnitude < 80 then
-                    table.insert(nearbyJailParts, obj)
+    if godModeEnabled then
+        godModeConnection = RunService.RenderStepped:Connect(function()
+            local humanoid = GetLocalHumanoid()
+            if humanoid then
+                humanoid.MaxHealth = 9e8
+                if humanoid.Health < 5 then
+                    humanoid.Health = humanoid.MaxHealth
                 end
             end
-        end
-    end
-
-    if #nearbyJailParts > 0 then
-        for _, part in ipairs(nearbyJailParts) do
-            part.CanCollide = false
-            part.Transparency = 1
-        end
-    end
-
-    root.CFrame = root.CFrame + Vector3.new(0, 8, 0)
-    humanoid.Sit = false
-end
-
-local function ClearTeamButtons()
-    for _, btn in ipairs(teamButtons) do
-        if btn and btn.Parent then
-            btn:Destroy()
-        end
-    end
-    teamButtons = {}
-end
-
-local function RefreshTeamsMenu()
-    ClearTeamButtons()
-
-    local header = CreateSectionLabel("JAIL / TIMES / FUN")
-    header.TextSize = 13
-
-    CreateDebugButton("Liberar do Jail / Prisão", EscapeJail)
-    CreateDebugButton("Alternar Noclip (Self)", ToggleNoclip)
-    CreateDebugButton("Modo Divertido: Super Speed", ToggleSpeedBoost)
-    CreateDebugButton("Modo Divertido: Super Jump", function()
-        local character = localPlayer.Character
-        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-        if not humanoid then
-            return
-        end
-
-        humanoid.JumpPower = 120
-        task.wait(0.3)
-        humanoid.JumpPower = 50
-    end)
-    CreateDebugButton("Modo Divertido: Ghost", ToggleGhostMode)
-
-    local teamLabel = Instance.new("TextLabel")
-    teamLabel.Size = UDim2.new(1, -5, 0, 18)
-    teamLabel.Text = "Times atuais:" 
-    teamLabel.TextColor3 = Color3.fromRGB(255, 210, 90)
-    teamLabel.BackgroundTransparency = 1
-    teamLabel.Font = Enum.Font.GothamBold
-    teamLabel.TextSize = 12
-    teamLabel.TextXAlignment = Enum.TextXAlignment.Left
-    teamLabel.Parent = ContentContainer
-
-    local teams = {}
-    for _, team in ipairs(TeamsService:GetChildren()) do
-        if team:IsA("Team") then
-            table.insert(teams, team)
-        end
-    end
-    table.sort(teams, function(a, b)
-        return a.Name < b.Name
-    end)
-
-    for _, team in ipairs(teams) do
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, -5, 0, 30)
-        btn.Text = "Entrar em " .. team.Name
-        btn.TextColor3 = Color3.fromRGB(240, 240, 240)
-        btn.BackgroundColor3 = Color3.fromRGB(45, 45, 58)
-        btn.Font = Enum.Font.Gotham
-        btn.TextSize = 12
-        btn.Parent = ContentContainer
-
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 4)
-        corner.Parent = btn
-
-        btn.MouseButton1Click:Connect(function()
-            local success, err = pcall(function()
-                localPlayer.Team = team
-            end)
-            if not success then
-                warn("Não foi possível entrar no time: " .. tostring(err))
-            end
         end)
-
-        table.insert(teamButtons, btn)
     end
 end
 
-RefreshTeamsMenu()
-
-TeamsService.ChildAdded:Connect(function()
-    RefreshTeamsMenu()
-end)
-TeamsService.ChildRemoved:Connect(function()
-    RefreshTeamsMenu()
-end)
-Players.PlayerAdded:Connect(function()
-    RefreshTeamsMenu()
-end)
-Players.PlayerRemoving:Connect(function()
-    RefreshTeamsMenu()
-end)
-
-localPlayer.CharacterAdded:Connect(function(character)
-    if noclipEnabled then
-        task.wait(0.2)
-        ApplyNoclip(true)
-    end
-
-    if ghostEnabled then
-        task.wait(0.2)
-        ToggleGhostMode()
-    end
-end)
-
--- =============================================================================
--- RECURSO 1: VOO
--- =============================================================================
-local isFlying = false
-local flySpeed = 60
-local connection = nil
-local bVelocity = nil
-local bGyro = nil
-
-local function CleanupFly()
-    if connection then
-        connection:Disconnect()
-        connection = nil
-    end
-    if bGyro then
-        bGyro:Destroy()
-        bGyro = nil
-    end
-    if bVelocity then
-        bVelocity:Destroy()
-        bVelocity = nil
-    end
-end
-
-local function ToggleFly()
+local function GetAimbotTarget()
     local character = localPlayer.Character
     local root = character and character:FindFirstChild("HumanoidRootPart")
-    local humanoid = character and character:FindFirstChild("Humanoid")
-
-    if not root or not humanoid then
-        return
+    if not root then
+        return nil
     end
 
-    isFlying = not isFlying
+    local bestTarget = nil
+    local bestDistance = math.huge
+    local screenCenter = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
 
-    if isFlying then
-        humanoid.PlatformStand = true
-
-        bGyro = Instance.new("BodyGyro")
-        bGyro.P = 9e4
-        bGyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-        bGyro.cframe = root.CFrame
-        bGyro.Parent = root
-
-        bVelocity = Instance.new("BodyVelocity")
-        bVelocity.velocity = Vector3.new(0, 0, 0)
-        bVelocity.maxForce = Vector3.new(9e9, 9e9, 9e9)
-        bVelocity.Parent = root
-
-        connection = RunService.RenderStepped:Connect(function()
-            local direction = humanoid.MoveDirection
-            local newVelocity = Vector3.new(0, 0, 0)
-
-            if direction.Magnitude > 0 then
-                newVelocity = camera.CFrame.LookVector * flySpeed
-            end
-
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                newVelocity = newVelocity + Vector3.new(0, flySpeed, 0)
-            end
-
-            bVelocity.velocity = newVelocity
-            bGyro.cframe = camera.CFrame
-        end)
-    else
-        CleanupFly()
-        humanoid.PlatformStand = false
-    end
-end
-
-localPlayer.CharacterAdded:Connect(function()
-    if isFlying then
-        task.wait(0.2)
-        ToggleFly()
-    end
-end)
-
-CreateDebugButton("Alternar Modo Voo (Fly)", ToggleFly)
-
--- =============================================================================
--- RECURSO 2: ESP POR TIME
--- =============================================================================
-local espActive = false
-local currentHighlights = {}
-
-local function ClearESP()
-    for _, hl in pairs(currentHighlights) do
-        if hl then
-            hl:Destroy()
-        end
-    end
-    currentHighlights = {}
-end
-
-local function ApplyTeamESP()
-    espActive = not espActive
-    ClearESP()
-
-    if not espActive then
-        return
-    end
-
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= localPlayer and p.Character then
-            local teamColor = (p.Team and p.Team.TeamColor.Color) or Color3.fromRGB(255, 0, 0)
-
-            local Highlight = Instance.new("Highlight")
-            Highlight.Name = "DebugESP_" .. p.Name
-            Highlight.FillColor = teamColor
-            Highlight.FillTransparency = 0.5
-            Highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-            Highlight.OutlineTransparency = 0.2
-            Highlight.Adornee = p.Character
-            Highlight.Parent = p.Character
-
-            table.insert(currentHighlights, Highlight)
-        end
-    end
-end
-
-CreateDebugButton("Alternar ESP por Cores de Time", ApplyTeamESP)
-
-Players.PlayerAdded:Connect(function(p)
-    p.CharacterAdded:Connect(function()
-        if espActive then
-            task.wait(1)
-            ApplyTeamESP()
-        end
-    end)
-end)
-
--- =============================================================================
--- RECURSO 3: FOV
--- =============================================================================
-local fovConnection = nil
-
-local function ToggleFOV(targetValue)
-    if fovConnection then
-        fovConnection:Disconnect()
-        fovConnection = nil
-    end
-
-    if targetValue then
-        fovConnection = RunService.RenderStepped:Connect(function()
-            camera.FieldOfView = targetValue
-        end)
-    end
-end
-
-CreateDebugButton("Fixar FOV Ampliado (110)", function()
-    ToggleFOV(110)
-end)
-
-CreateDebugButton("Resetar Câmera / FOV Padrão", function()
-    ToggleFOV(nil)
-    camera.FieldOfView = 70
-end)
-
--- =============================================================================
--- RECURSO 4: RASTRO NEON
--- =============================================================================
-local trailActive = false
-local function ToggleTrail()
-    local char = localPlayer.Character
-    local root = char and char:FindFirstChild("HumanoidRootPart")
-    local head = char and char:FindFirstChild("Head")
-
-    if not root or not head then
-        return
-    end
-
-    trailActive = not trailActive
-
-    if trailActive then
-        local attachment0 = Instance.new("Attachment", head)
-        attachment0.Name = "TrailAttachment0"
-        local attachment1 = Instance.new("Attachment", root)
-        attachment1.Name = "TrailAttachment1"
-
-        local trail = Instance.new("Trail")
-        trail.Name = "DebugTrail"
-        trail.Attachment0 = attachment0
-        trail.Attachment1 = attachment1
-        trail.Color = ColorSequence.new(Color3.fromRGB(0, 255, 255), Color3.fromRGB(255, 0, 255))
-        trail.LightEmission = 1
-        trail.WidthScale = NumberSequence.new(1, 0)
-        trail.Lifetime = 0.8
-        trail.Parent = root
-    else
-        if head:FindFirstChild("TrailAttachment0") then
-            head.TrailAttachment0:Destroy()
-        end
-        if root:FindFirstChild("TrailAttachment1") then
-            root.TrailAttachment1:Destroy()
-        end
-        if root:FindFirstChild("DebugTrail") then
-            root.DebugTrail:Destroy()
-        end
-    end
-end
-
-CreateDebugButton("Alternar Rastro Neon", ToggleTrail)
-
--- =============================================================================
--- RECURSO 5: GRAVIDADE
--- =============================================================================
-local gravityState = 0
-local function CycleGravity()
-    gravityState = (gravityState + 1) % 3
-    if gravityState == 1 then
-        workspace.Gravity = 30
-    elseif gravityState == 2 then
-        workspace.Gravity = 0
-    else
-        workspace.Gravity = 196.2
-    end
-end
-
-CreateDebugButton("Ciclar Gravidade (Padrão/Baixa/Zero)", CycleGravity)
-
--- =============================================================================
--- RECURSO 6: HITBOXES
--- =============================================================================
-local hitboxesVisible = false
-local function ToggleHitboxes()
-    hitboxesVisible = not hitboxesVisible
-
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("Humanoid") and obj.Parent ~= localPlayer.Character then
-            local character = obj.Parent
-            for _, part in ipairs(character:GetChildren()) do
-                if part:IsA("BasePart") then
-                    local box = part:FindFirstChild("HitboxVisualizer")
-                    if hitboxesVisible then
-                        if not box then
-                            local selection = Instance.new("SelectionBox")
-                            selection.Name = "HitboxVisualizer"
-                            selection.Color3 = Color3.fromRGB(255, 170, 0)
-                            selection.LineThickness = 0.05
-                            selection.Adornee = part
-                            selection.Parent = part
-                        end
-                    else
-                        if box then
-                            box:Destroy()
-                        end
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local targetPart = player.Character:FindFirstChild("HumanoidRootPart")
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid and humanoid.Health > 0 and targetPart then
+                local screenPoint, onScreen = camera:WorldToViewportPoint(targetPart.Position)
+                if onScreen then
+                    local distance = (screenCenter - Vector2.new(screenPoint.X, screenPoint.Y)).Magnitude
+                    if distance < bestDistance and distance <= aimbotFov then
+                        bestDistance = distance
+                        bestTarget = player
                     end
                 end
             end
         end
     end
+
+    return bestTarget
 end
 
-CreateDebugButton("Visualizar Hitbox de NPCs", ToggleHitboxes)
+local function UpdateAimbotState()
+    if aimbotConnection then
+        aimbotConnection:Disconnect()
+        aimbotConnection = nil
+    end
+
+    if aimbotEnabled then
+        aimbotConnection = RunService.RenderStepped:Connect(function()
+            local target = GetAimbotTarget()
+            if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                camera.CFrame = CFrame.new(camera.CFrame.Position, target.Character.HumanoidRootPart.Position)
+            end
+        end)
+    end
+end
+
+local function UpdateKillAuraState()
+    if killAuraConnection then
+        killAuraConnection:Disconnect()
+        killAuraConnection = nil
+    end
+
+    if killAuraEnabled then
+        killAuraConnection = RunService.RenderStepped:Connect(function()
+            local character = localPlayer.Character
+            local root = character and character:FindFirstChild("HumanoidRootPart")
+            if not root then
+                return
+            end
+
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local targetHumanoid = player.Character:FindFirstChildOfClass("Humanoid")
+                    local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
+                    if targetHumanoid and targetHumanoid.Health > 0 and targetRoot then
+                        local distance = (targetRoot.Position - root.Position).Magnitude
+                        if distance <= killAuraRadius then
+                            targetHumanoid:TakeDamage(5)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end
+
+local function ResetPlayerState()
+    playerSpeed = 16
+    playerJump = 50
+    killAuraRadius = 35
+    aimbotFov = 45
+    godModeEnabled = false
+    aimbotEnabled = false
+    killAuraEnabled = false
+    ghostEnabled = false
+    noclipEnabled = false
+    UpdateGodModeState()
+    UpdateAimbotState()
+    UpdateKillAuraState()
+    ApplyPlayerMovement()
+    ApplyGhostMode()
+    ApplyNoclip(false)
+end
+
+local function BuildMainPage()
+    CreateSectionLabel("Principal")
+    CreateToggleButton("God Mode Immortal", godModeEnabled, function()
+        godModeEnabled = not godModeEnabled
+        UpdateGodModeState()
+        return godModeEnabled
+    end)
+
+    CreateToggleButton("Aimbot", aimbotEnabled, function()
+        aimbotEnabled = not aimbotEnabled
+        UpdateAimbotState()
+        return aimbotEnabled
+    end)
+
+    CreateToggleButton("Kill Aura", killAuraEnabled, function()
+        killAuraEnabled = not killAuraEnabled
+        UpdateKillAuraState()
+        return killAuraEnabled
+    end)
+
+    CreateActionButton("Resetar Configurações", function()
+        ResetPlayerState()
+        ClearPageContent()
+        SetPage(activePage)
+    end)
+end
+
+local function BuildPlayerPage()
+    CreateSectionLabel("Jogador")
+    CreateSlider("Velocidade", 16, 120, playerSpeed, function(value)
+        playerSpeed = math.floor(value)
+        ApplyPlayerMovement()
+    end)
+
+    CreateSlider("Força do Pulo", 50, 200, playerJump, function(value)
+        playerJump = math.floor(value)
+        ApplyPlayerMovement()
+    end)
+
+    CreateToggleButton("Noclip", noclipEnabled, ToggleNoclip)
+    CreateToggleButton("Ghost Mode", ghostEnabled, ToggleGhostMode)
+end
+
+local function BuildCombatPage()
+    CreateSectionLabel("Combate")
+    CreateSlider("Raio Kill Aura", 5, 120, killAuraRadius, function(value)
+        killAuraRadius = math.floor(value)
+    end)
+
+    CreateSlider("Aimbot FOV", 5, 90, aimbotFov, function(value)
+        aimbotFov = math.floor(value)
+    end)
+
+    CreateActionButton("Resetar Câmera / FOV", function()
+        camera.FieldOfView = 70
+    end)
+end
+
+local function BuildCreditsPage()
+    CreateSectionLabel("Créditos")
+
+    local creditLabel = Instance.new("TextLabel")
+    creditLabel.Size = UDim2.new(1, -10, 0, 60)
+    creditLabel.Text = "Painel criado por FoxnameHub\nAdaptado para sidebar com modos de combate, ajustes de jogador e créditos."
+    creditLabel.TextColor3 = Color3.fromRGB(210, 210, 255)
+    creditLabel.BackgroundTransparency = 1
+    creditLabel.Font = Enum.Font.Gotham
+    creditLabel.TextSize = 13
+    creditLabel.TextWrapped = true
+    creditLabel.TextYAlignment = Enum.TextYAlignment.Top
+    creditLabel.TextXAlignment = Enum.TextXAlignment.Left
+    creditLabel.Parent = ContentScroll
+end
+
+pageBuilders["Main"] = BuildMainPage
+pageBuilders["Player"] = BuildPlayerPage
+pageBuilders["Combat"] = BuildCombatPage
+pageBuilders["Credits"] = BuildCreditsPage
+
+local function CreatePageButtons()
+    CreatePageButton("Main", "Main")
+    CreatePageButton("Player", "LocalPlayer")
+    CreatePageButton("Combat", "Combat")
+    CreatePageButton("Credits", "Créditos")
+end
+
+CreatePageButtons()
+SetPage("Main")
+
+localPlayer.CharacterAdded:Connect(function()
+    task.wait(0.25)
+    ApplyPlayerMovement()
+    ApplyGhostMode()
+    ApplyNoclip(noclipEnabled)
+    UpdateGodModeState()
+    UpdateAimbotState()
+    UpdateKillAuraState()
+end)
+
+local function CleanupConnections()
+    if aimbotConnection then
+        aimbotConnection:Disconnect()
+        aimbotConnection = nil
+    end
+    if killAuraConnection then
+        killAuraConnection:Disconnect()
+        killAuraConnection = nil
+    end
+    if godModeConnection then
+        godModeConnection:Disconnect()
+        godModeConnection = nil
+    end
+end
+
+ResetPlayerState()
