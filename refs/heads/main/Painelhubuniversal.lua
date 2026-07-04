@@ -219,6 +219,30 @@ local function CreatePageButton(pageName, buttonText)
     return Button
 end
 
+local function SetPage(pageName)
+    print("DebugPanel:SetPage", pageName, pageBuilders[pageName] ~= nil)
+    activePage = pageName
+    PageTitle.Text = pageButtons[pageName] and pageButtons[pageName].Text or pageName
+    for name, btn in pairs(pageButtons) do
+        btn.BackgroundColor3 = (name == pageName) and Color3.fromRGB(45, 50, 70) or Color3.fromRGB(30, 35, 45)
+    end
+    ClearPageContent()
+
+    if pageBuilders[pageName] then
+        pageBuilders[pageName]()
+    else
+        local errorLabel = Instance.new("TextLabel")
+        errorLabel.Size = UDim2.new(1, -10, 0, 40)
+        errorLabel.Text = "Erro: pagina não encontrada - " .. pageName
+        errorLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+        errorLabel.BackgroundTransparency = 1
+        errorLabel.Font = Enum.Font.GothamBold
+        errorLabel.TextSize = 14
+        errorLabel.TextXAlignment = Enum.TextXAlignment.Left
+        errorLabel.Parent = ContentScroll
+    end
+end
+
 local function CreateSectionLabel(text)
     local Label = Instance.new("TextLabel")
     Label.Size = UDim2.new(1, -10, 0, 20)
@@ -648,6 +672,8 @@ local function BuildCreditsPage()
     creditLabel.Parent = ContentScroll
 end
 
+
+print("DebugPanel: iniciando painel")
 pageBuilders["Main"] = BuildMainPage
 pageBuilders["Player"] = BuildPlayerPage
 pageBuilders["Combat"] = BuildCombatPage
